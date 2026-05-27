@@ -1,0 +1,38 @@
+* Teste minimo pos-layout do uart_top
+
+.lib "/opt/pdks/ihp-sg13g2/libs.tech/ngspice/models/cornerMOSlv.lib" mos_tt
+.include "uart_top.spice"
+
+.param VDD=1.2
+
+Vvdd VPWR 0 DC {VDD}
+Vvss VGND 0 DC 0
+
+Vclk clk 0 PULSE(0 {VDD} 0 100p 100p 5n 10n)
+Vrst rst 0 PWL(0 {VDD} 30n {VDD} 30.1n 0 10u 0)
+
+Vstart tx_start 0 PULSE(0 {VDD} 200n 100p 100p 20n 10u)
+
+* tx_data = 8'h55
+Vd0 tx_data0 0 DC {VDD}
+Vd1 tx_data1 0 DC 0
+Vd2 tx_data2 0 DC {VDD}
+Vd3 tx_data3 0 DC 0
+Vd4 tx_data4 0 DC {VDD}
+Vd5 tx_data5 0 DC 0
+Vd6 tx_data6 0 DC {VDD}
+Vd7 tx_data7 0 DC 0
+
+Rloop tx rx 1
+
+XUUT VGND VPWR clk rst rx rx_data0 rx_data1 rx_data2 rx_data3 rx_data4 rx_data5 rx_data6 rx_data7 rx_done tx tx_busy tx_data0 tx_data1 tx_data2 tx_data3 tx_data4 tx_data5 tx_data6 tx_data7 tx_done tx_start uart_top
+
+.options rshunt=1e12 gmin=1e-12 reltol=1e-3 method=gear
+
+.control
+save v(clk) v(rst) v(tx_start) v(tx) v(tx_busy)
+tran 5n 500n uic
+write uart_post_test.raw
+.endc
+
+.end
